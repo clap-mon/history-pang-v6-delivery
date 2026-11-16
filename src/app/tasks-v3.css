@@ -1,0 +1,756 @@
+/* 2. 양갈래 바구니 분류하기 (category-sort) */
+.task-category-sort {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.category-sort-guide-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.85);
+  border-radius: 999px;
+  padding: 4px 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.category-sort-guide-pill.complete {
+  border-color: #10b981;
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.92) 0%, rgba(4, 47, 46, 0.98) 100%);
+}
+
+.guide-pill-badge {
+  background: #f59e0b;
+  color: #1e1b4b;
+  font-size: 10.5px;
+  font-weight: 950;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.category-sort-guide-pill.complete .guide-pill-badge {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.guide-pill-text {
+  font-size: 12.5px;
+  font-weight: 750;
+  color: #f8fafc;
+  line-height: 1.25;
+  flex: 1;
+}
+
+.guide-pill-text b {
+  color: #fef08a;
+  font-weight: 900;
+}
+
+.guide-pill-counter {
+  font-size: 11px;
+  font-weight: 850;
+  color: #cbd5e1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 1.5px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.guide-pill-counter b {
+  color: #fbbf24;
+}
+
+.sort-queue-pool {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.sort-queue-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #ffffff;
+  border: 2px solid #94a3b8;
+  border-radius: 11px;
+  padding: 6px 12px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #64748b;
+  transition: all 0.16s ease;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.sort-queue-card:hover:not(.selected) {
+  transform: translateY(-2px);
+  border-color: #64748b;
+  box-shadow: 0 4px 0 #475569;
+}
+
+.sort-queue-card.selected {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2.5px solid #f59e0b;
+  box-shadow: 0 3px 0 #b45309, 0 0 14px rgba(245, 158, 11, 0.4);
+  transform: translateY(-2px);
+}
+
+.sort-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.sort-card-emoji {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.sort-active-tag {
+  background: #f59e0b;
+  color: #451a03;
+  font-size: 10px;
+  font-weight: 950;
+  padding: 1.5px 6px;
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.sort-idle-tag {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 9.5px;
+  font-weight: 850;
+  padding: 1.5px 5px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+}
+
+.sort-card-text {
+  font-size: 12.5px;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
+.sort-buckets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 3px;
+}
+
+/* 🧺 실제 수납 바구니 외형을 구현한 입체 바구니 컨테이너 (리얼 우드 & 라탄 직조 바구니) */
+.sort-bucket-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 16px 16px 22px 22px;
+  padding: 12px 14px 10px 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-height: 120px;
+  box-sizing: border-box;
+  /* 실제 라탄/왕골을 엮은 듯한 입체 직조 텍스처 (Wicker Basket Weave) */
+  background-color: #fdf6e7;
+  background-image: 
+    repeating-linear-gradient(45deg, rgba(146, 64, 14, 0.12) 0px, rgba(146, 64, 14, 0.12) 3px, transparent 3px, transparent 11px),
+    repeating-linear-gradient(-45deg, rgba(146, 64, 14, 0.12) 0px, rgba(146, 64, 14, 0.12) 3px, transparent 3px, transparent 11px),
+    linear-gradient(180deg, #fffdf7 0%, #fef3c7 100%);
+  border: 3px solid #b45309;
+  border-top: 6px solid #92400e;
+  box-shadow: 0 6px 0 #78350f, 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+/* 바구니 상단 도톰한 꼬임 끈 손잡이 (Woven Handle Arch) */
+.basket-arch-handle {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 18px;
+  border: 4px solid #92400e;
+  border-bottom: none;
+  border-radius: 18px 18px 0 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.18s ease;
+}
+
+.basket-handle-grip {
+  display: block;
+  width: 28px;
+  height: 6px;
+  background: linear-gradient(90deg, #b45309, #f59e0b, #b45309);
+  border: 1.5px solid #78350f;
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 왼쪽: 황금 밀짚 라탄 바구니 (양인 바구니) */
+.sort-bucket-box.left {
+  border-color: #b45309;
+  border-top-color: #92400e;
+}
+
+.sort-bucket-box.left.ready {
+  border-color: #d97706;
+  border-top-color: #b45309;
+  box-shadow: 0 7px 0 #78350f, 0 0 20px rgba(245, 158, 11, 0.55);
+  animation: basketLeftGlow 1.4s infinite alternate ease-in-out;
+}
+
+/* 오른쪽: 짙은 대나무/월넛 우드 바구니 (천인 바구니) */
+.sort-bucket-box.right {
+  border-color: #854d0e;
+  border-top-color: #713f12;
+}
+
+.sort-bucket-box.right.ready {
+  border-color: #a16207;
+  border-top-color: #854d0e;
+  box-shadow: 0 7px 0 #581c87, 0 0 20px rgba(168, 85, 247, 0.55);
+  animation: basketRightGlow 1.4s infinite alternate ease-in-out;
+}
+
+@keyframes basketLeftGlow {
+  0% { box-shadow: 0 6px 0 #78350f, 0 0 10px rgba(245, 158, 11, 0.3); }
+  100% { box-shadow: 0 7px 0 #78350f, 0 0 24px rgba(245, 158, 11, 0.7); }
+}
+
+@keyframes basketRightGlow {
+  0% { box-shadow: 0 6px 0 #581c87, 0 0 10px rgba(168, 85, 247, 0.3); }
+  100% { box-shadow: 0 7px 0 #581c87, 0 0 24px rgba(168, 85, 247, 0.7); }
+}
+
+.sort-bucket-box.ready:hover:not(:disabled) {
+  transform: translateY(-3px);
+}
+
+.sort-bucket-box.ready:hover .basket-arch-handle {
+  transform: translateX(-50%) translateY(-3px);
+}
+
+.sort-bucket-box.completed {
+  border-color: #059669;
+  border-top-color: #047857;
+  background-color: #f0fdf4;
+  box-shadow: 0 6px 0 #064e3b, 0 8px 16px rgba(5, 150, 105, 0.2);
+}
+
+.sort-bucket-box.completed .basket-arch-handle {
+  border-color: #047857;
+}
+
+/* 바구니 앞면에 달린 원목 네임 플레이트 (Wooden Hanging Tag) */
+.sort-bucket-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+  border: 2px solid #b45309;
+  border-radius: 10px;
+  padding: 6px 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.basket-rim-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 38px;
+  height: 34px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: 8px;
+  border: 1.5px solid #d97706;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.basket-rim-badge .basket-icon {
+  font-size: 16px;
+}
+
+.sort-bucket-emoji {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.sort-bucket-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 바구니 가죽 패치 태그 */
+.basket-sub-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 1000;
+  padding: 1.5px 7px;
+  border-radius: 999px;
+  margin-bottom: 2px;
+  background: #78350f !important;
+  color: #fef3c7 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  letter-spacing: -0.2px;
+}
+
+.sort-bucket-title-wrap strong {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 1000;
+  color: #451a03;
+  letter-spacing: -0.02em;
+}
+
+.sort-bucket-title-wrap small {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #78350f;
+  margin-top: 1px;
+}
+
+.sort-bucket-count {
+  background: linear-gradient(135deg, #b45309, #78350f);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 1000;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  border: 1px solid #78350f;
+}
+
+.sort-bucket-box.left .sort-bucket-count {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border-color: #0c4a6e;
+}
+
+.sort-bucket-box.right .sort-bucket-count {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  border-color: #4c1d95;
+}
+
+.sort-bucket-box.completed .sort-bucket-count {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #047857;
+}
+
+/* 바구니 안쪽 수납공간 (Basket Interior Well - 린넨 안감 포켓) */
+.sort-bucket-items.basket-interior {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  background: rgba(254, 243, 199, 0.45);
+  border-radius: 12px;
+  border: 2px dashed rgba(180, 83, 9, 0.4);
+  box-shadow: inset 0 3px 8px rgba(120, 53, 15, 0.12);
+  padding: 8px 8px;
+  box-sizing: border-box;
+  min-height: 70px;
+}
+
+.sort-bucket-empty-prompt {
+  font-size: 12px;
+  font-weight: 900;
+  color: #92400e;
+  text-align: center;
+  padding: 10px 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 9px;
+  border: 1.5px dashed rgba(180, 83, 9, 0.4);
+  transition: all 0.15s ease;
+}
+
+.sort-bucket-empty-prompt.ready-to-drop {
+  background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+  border-color: #ca8a04;
+  color: #713f12;
+  box-shadow: 0 3px 8px rgba(202, 138, 4, 0.35);
+  transform: scale(1.02);
+}
+
+.drop-guide-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.drop-arrow-bounce {
+  display: inline-block;
+  font-size: 14px;
+  animation: basketDropBounce 0.75s infinite ease-in-out;
+}
+
+@keyframes basketDropBounce {
+  0%, 100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(2px);
+  }
+}
+
+.idle-guide-label {
+  display: block;
+}
+
+/* 수납된 미니 카드 칩 (바구니 안에 쏙 담긴 카드) */
+.sorted-mini-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 2px solid #059669;
+  border-radius: 8px;
+  padding: 5px 10px;
+  box-shadow: 0 2px 0 rgba(5, 150, 105, 0.25), 0 2px 5px rgba(0, 0, 0, 0.06);
+  animation: chipDropIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes chipDropIn {
+  0% { transform: translateY(-8px) scale(0.92); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.mini-chip-check {
+  font-size: 12px;
+  font-weight: 1000;
+  color: #059669;
+}
+
+.mini-chip-emoji {
+  font-size: 14px;
+}
+
+.mini-chip-text {
+  font-size: 12.5px;
+  font-weight: 900;
+  color: #14532d;
+  line-height: 1.3;
+}
+
+/* 3. 역사 판결문 OX 도장 찍기 (ox-verdict) */
+.task-ox-verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 1060px;
+  margin: 0 auto;
+}
+
+.ox-statements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.ox-statement-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 18px;
+  box-shadow: 0 3px 0 #94a3b8;
+  transition: all 0.15s ease;
+}
+
+.ox-statement-row:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 3px 0 #64748b;
+}
+
+.ox-statement-row.resolved {
+  background: #f0fdf4;
+  border-color: #16a34a;
+  box-shadow: 0 2.5px 0 #15803d;
+}
+
+.ox-statement-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.ox-stmt-num {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #78350f;
+  border: 1.5px solid #d97706;
+  font-size: 11px;
+  font-weight: 950;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.ox-statement-text p {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.3;
+  word-break: keep-all;
+}
+
+.ox-stamp-buttons {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ox-stamp-btn {
+  font-size: 12.5px;
+  font-weight: 950;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  min-width: 68px;
+  text-align: center;
+}
+
+.ox-stamp-btn.true-btn {
+  background: #f0fdf4;
+  border: 1.5px solid #059669;
+  color: #059669;
+  box-shadow: 0 1.5px 0 #047857;
+}
+
+.ox-stamp-btn.true-btn:hover:not(:disabled) {
+  background: #dcfce7;
+  transform: translateY(-1px);
+}
+
+.ox-stamp-btn.true-btn.stamped {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  border-color: #047857 !important;
+  box-shadow: 0 2.5px 0 #064e3b, 0 0 14px rgba(16, 185, 129, 0.45) !important;
+  transform: scale(1.04);
+}
+
+.ox-stamp-btn.false-btn {
+  background: #fff1f2;
+  border: 1.5px solid #e11d48;
+  color: #e11d48;
+  box-shadow: 0 1.5px 0 #be123c;
+}
+
+.ox-stamp-btn.false-btn:hover:not(:disabled) {
+  background: #ffe4e6;
+  transform: translateY(-1px);
+}
+
+.ox-stamp-btn.false-btn.stamped {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
+  color: #ffffff !important;
+  border-color: #be123c !important;
+  box-shadow: 0 2.5px 0 #881337, 0 0 14px rgba(225, 29, 72, 0.45) !important;
+  transform: scale(1.04);
+}
+
+.ox-confirm-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.ox-submit-btn {
+  padding: 6px 20px !important;
+  font-size: 13px !important;
+  border-radius: 9px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ox-submit-btn.is-ready {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  color: #ffffff !important;
+  border-color: #b45309 !important;
+  box-shadow: 0 3px 0 #78350f, 0 0 16px rgba(245, 158, 11, 0.5) !important;
+  cursor: pointer !important;
+  transform: translateY(-2px);
+  animation: pulseSubmitBtn 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseSubmitBtn {
+  0%, 100% {
+    box-shadow: 0 3px 0 #78350f, 0 0 14px rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    box-shadow: 0 3px 0 #78350f, 0 0 20px rgba(245, 158, 11, 0.75);
+    transform: translateY(-2px) scale(1.02);
+  }
+}
+
+/* 4. 고문서 다중 빈칸 복원하기 (document-restore - 적응형 폭 & 중앙 정렬) */
+.task-document-restore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.task-document-restore .task-instruction {
+  width: fit-content;
+  margin: 0 auto 0 auto;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 2px 10px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 999px;
+  color: #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.doc-restore-scroll {
+  width: 100% !important;
+  max-width: 1040px !important;
+  min-width: 580px;
+  margin: 0 auto !important;
+  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2.5px solid #92400e;
+  border-radius: 14px;
+  padding: 14px 22px;
+  box-shadow: 0 4px 0 #78350f, 0 6px 14px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+.doc-restore-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1.5px dashed #d97706;
+}
+
+.doc-restore-badge {
+  background: #78350f;
+  color: #fef3c7;
+  font-size: 10.5px;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.doc-restore-header strong {
+  font-size: 13.5px;
+  font-weight: 950;
+  color: #451a03;
+}
+
+.doc-restore-body {
+  font-size: 15.5px !important;
+  font-weight: 850;
+  color: #292524;
+  line-height: 1.6 !important;
+  white-space: pre-line;
+  word-break: keep-all;
+}
+
+.doc-slot-chip {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 3px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1.5px dashed #b45309;
+  background: #ffffff;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 950;
+  cursor: pointer;
+  vertical-align: baseline;
+  transition: all 0.14s ease;
+}
+
+.doc-slot-chip.active-target {
+  border-style: solid;
+  border-color: #d97706;
+  background: #fef08a;
+  color: #713f12;
+  box-shadow: 0 2px 0 #a16207;
+  transform: scale(1.03);
+}
+
+.doc-slot-chip.filled {
+  border-style: solid;
+  border-color: #15803d;
+  background: #dcfce7;
+  color: #14532d;
+  cursor: default;
+}
+
+.doc-word-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.doc-word-btn {
+  background: #ffffff;
+  border: 2px solid #1e293b;
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 950;
+  color: #0f172a;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #0f172a;
+  transition: all 0.14s ease;
+}
+
+.doc-word-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: #fef9c3;
+  border-color: #ca8a04;
+}
+
+.doc-word-btn.used {
+  opacity: 0.42;
+  background: #e2e8f0;
+  box-shadow: none;
+  cursor: default;

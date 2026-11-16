@@ -1,0 +1,648 @@
+/* ========================================================
+   정리 노트 (v4) — 줄 공책 + 빨간 여백선 + 마스킹 테이프, 그림 없이 CSS로만 그린다.
+   형광펜 제목, 파란 볼펜 답, 빨간 펜 동그라미로 학생이 직접 정리한 노트처럼 보인다.
+   (처음에는 녹색 칠판이었고, 클래스 이름 chalk-* 은 그때 그대로 둔다.)
+   ======================================================== */
+:root {
+  --note-paper: #fffdf6;
+  --note-edge: #e4dccb;
+  --note-rule: #d5e3f1;
+  --note-margin: #f2a7a7;
+  --note-tape: rgba(246, 215, 122, 0.85);
+  --note-highlight: #fff08a;
+  --note-mark: #ffd9e6;
+  --chalk-title: #1f2937;
+  --chalk-text: #2b2b2b;
+  --chalk-answer: #1d4ed8;
+  --chalk-note: #64748b;
+  --chalk-circle: #dc2626;
+  --note-pencil: #94a3b8;
+  --note-line-height: 1.7em;
+}
+
+/* 노트가 있는 보드는 단계 테마 배경을 걷어 내고 노트만 남긴다. */
+.dialogue-stage-board.has-chalkboard {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px 6px !important;
+  justify-content: center;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.chalkboard-frame {
+  box-sizing: border-box;
+  width: min(1208px, 100%);
+  padding: 12px 14px 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chalkboard-surface {
+  position: relative;
+  padding: clamp(18px, 2.2vw, 28px) clamp(18px, 2.4vw, 32px) clamp(16px, 2vw, 24px) clamp(52px, 5vw, 72px);
+  background: var(--note-paper);
+  border: 1px solid var(--note-edge);
+  border-radius: 6px;
+  box-shadow: 0 2px 0 var(--note-edge), 0 10px 24px rgba(0, 0, 0, 0.28);
+  color: var(--chalk-text);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+
+/* 빨간 여백선 */
+.chalkboard-surface::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: clamp(36px, 3.6vw, 52px);
+  width: 2px;
+  background: var(--note-margin);
+}
+
+/* 마스킹 테이프 */
+.chalkboard-surface::after {
+  content: "";
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 110px;
+  height: 22px;
+  margin-left: -55px;
+  background: var(--note-tape);
+  transform: rotate(-2deg);
+}
+
+/* 제목이 두 줄로 넘어가도 형광펜이 글자가 있는 줄마다 따로 칠해지게 inline + box-decoration-break를 쓴다.
+   (inline-block이면 두 줄 전체를 한 상자로 보고 아래쪽에만 띠가 칠해져 어색했다. v5에서 고친 것) */
+.chalk-title {
+  display: inline;
+  margin: 0;
+  padding: 0 6px;
+  background: linear-gradient(transparent 45%, var(--note-highlight) 45%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  color: var(--chalk-title);
+  font-size: clamp(22px, 2.5vw, 34px);
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+/* 제목이 inline이라 아래 여백은 다음 요소의 위 여백으로 준다. */
+.chalkboard-surface > .chalk-title + * {
+  margin-top: clamp(6px, 1vw, 12px);
+}
+
+.chalk-lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0;
+}
+
+/* 줄마다 공책 줄을 긋는다. 줄 높이와 같은 간격으로 반복해 줄바꿈한 줄에도 맞는다. */
+.chalk-line,
+.chalk-note {
+  font-size: clamp(18px, 2.15vw, 29px);
+  line-height: var(--note-line-height);
+  background-image: linear-gradient(to bottom, transparent calc(var(--note-line-height) - 1px), var(--note-rule) calc(var(--note-line-height) - 1px));
+  background-size: 100% var(--note-line-height);
+}
+
+.chalk-line {
+  position: relative;
+  padding-left: 1.2em;
+}
+
+.chalk-line::before {
+  content: "•";
+  position: absolute;
+  left: 0.2em;
+  top: 0;
+  color: var(--chalk-note);
+}
+
+.chalk-note {
+  color: var(--chalk-note);
+  font-size: clamp(15px, 1.75vw, 24px);
+  font-weight: 600;
+  text-align: right;
+}
+
+.chalk-mark {
+  padding: 0 0.15em;
+  background: linear-gradient(transparent 40%, var(--note-mark) 40%);
+  color: inherit;
+}
+
+.chalk-answer {
+  display: inline-block;
+  padding: 0 0.15em;
+  color: var(--chalk-answer);
+  animation: chalk-write 0.35s ease-out;
+}
+
+/* 빈칸 */
+.chalk-blank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.4em;
+  height: 1.3em;
+  margin: 0 0.15em;
+  padding: 0 0.4em;
+  vertical-align: middle;
+  border: 2px dashed var(--note-pencil);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--note-pencil);
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.chalk-blank:hover,
+.chalk-blank.active {
+  border-color: var(--chalk-answer);
+  border-style: solid;
+  background: var(--note-highlight);
+  color: var(--chalk-answer);
+}
+
+.chalk-blank.active {
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18);
+}
+
+/* 동그라미 치기 (빨간 펜) */
+.chalk-circle-group {
+  white-space: nowrap;
+}
+
+.chalk-circle-word {
+  position: relative;
+  margin: 0;
+  padding: 0 0.2em;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--chalk-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.chalk-circle-word:hover:not(:disabled) {
+  border-color: rgba(220, 38, 38, 0.45);
+  border-style: dashed;
+}
+
+.chalk-circle-word.circled {
+  border-color: var(--chalk-circle);
+  color: var(--chalk-circle);
+  animation: chalk-write 0.35s ease-out;
+}
+
+.chalk-circle-word:disabled {
+  cursor: default;
+}
+
+.chalk-slash {
+  color: var(--chalk-note);
+}
+
+.chalk-blank.shake,
+.chalk-circle-word.shake {
+  animation: chalk-shake 0.4s ease-in-out;
+  border-color: var(--chalk-circle);
+}
+
+/* 노트에 붙이는 작은 사진 (최대 한 장) */
+.chalkboard-frame.with-photo .chalk-lines {
+  padding-right: clamp(150px, 18vw, 230px);
+}
+
+.chalk-photo {
+  position: absolute;
+  right: clamp(12px, 1.6vw, 22px);
+  bottom: clamp(14px, 1.8vw, 24px);
+  width: clamp(140px, 17vw, 220px);
+  margin: 0;
+  padding: 6px 6px 4px;
+  background: #ffffff;
+  border: 1px solid var(--note-edge);
+  border-radius: 3px;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.15);
+  transform: rotate(1.5deg);
+  color: #1e293b;
+}
+
+/* 사진을 붙인 테이프 */
+.chalk-photo::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 56px;
+  height: 16px;
+  margin-left: -28px;
+  background: var(--note-tape);
+  transform: rotate(3deg);
+}
+
+.chalk-photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.chalk-photo figcaption {
+  padding-top: 3px;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.chalk-photo small {
+  display: block;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* 낱말 카드 받침 */
+.chalk-tray {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 6px;
+  padding: 8px 12px;
+  border: 2px solid #17152a;
+  border-radius: 12px;
+  background: #fffdf5;
+  color: #1e293b;
+  box-shadow: 3px 3px 0 #17152a;
+}
+
+.chalk-tray-label {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--chalk-answer);
+}
+
+.chalk-tray-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1 1 auto;
+}
+
+.chalk-word-card {
+  min-width: 88px;
+  padding: 8px 16px;
+  border: 2px solid #17152a;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #17152a;
+  font-size: 18px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #17152a;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.chalk-word-card:hover {
+  transform: translateY(-2px);
+  background: #fef9c3;
+}
+
+.chalk-word-card.missed {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.chalk-tray-count {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--chalk-answer);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.chalk-message {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.chalk-message.wrong {
+  color: #b91c1c;
+}
+
+.chalk-message.correct {
+  color: #15803d;
+}
+
+@keyframes chalk-shake {
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* 애니메이션이 멈춰도 글씨가 사라지지 않도록 투명도는 바꾸지 않는다. */
+@keyframes chalk-write {
+  0% { transform: scale(0.85); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 900px) {
+  .chalkboard-frame.with-photo .chalk-lines {
+    padding-right: 0;
+  }
+
+  .chalk-photo {
+    position: static;
+    margin: 10px 0 0 auto;
+    transform: none;
+  }
+}
+
+/* ========================================================
+   노트형 확인문제: 두 바구니, OX, 짝 맞추기, 순서, 객관식
+   ======================================================== */
+.chalk-task .chalk-title {
+  font-size: clamp(20px, 2.2vw, 30px);
+}
+
+/* 두 바구니 분류 */
+.chalk-sort-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: clamp(10px, 1.4vw, 16px);
+}
+
+.chalk-sort-chip {
+  padding: 6px 14px;
+  border: 2px dashed var(--note-pencil);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--chalk-text);
+  font: inherit;
+  font-size: clamp(17px, 1.9vw, 25px);
+  cursor: pointer;
+}
+
+.chalk-sort-chip:hover,
+.chalk-sort-chip.active {
+  border-style: solid;
+  border-color: var(--chalk-answer);
+  background: var(--note-highlight);
+  color: var(--chalk-answer);
+}
+
+.chalk-sort-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.chalk-sort-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: clamp(110px, 16vh, 170px);
+  padding: 8px clamp(10px, 1.6vw, 20px);
+  border: none;
+  border-top: 2px solid var(--chalk-text);
+  background: none;
+  color: var(--chalk-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chalk-sort-column + .chalk-sort-column {
+  border-left: 2px solid var(--chalk-text);
+}
+
+.chalk-sort-column.ready:hover {
+  background: rgba(255, 240, 138, 0.35);
+}
+
+.chalk-sort-column:disabled {
+  cursor: default;
+}
+
+.chalk-sort-column.shake {
+  animation: chalk-shake 0.4s ease-in-out;
+}
+
+.chalk-sort-heading {
+  padding: 0 4px;
+  background: linear-gradient(transparent 45%, var(--note-highlight) 45%);
+  color: var(--chalk-title);
+  font-size: clamp(19px, 2vw, 27px);
+  font-weight: 900;
+}
+
+.chalk-sort-desc {
+  color: var(--chalk-note);
+  font-size: clamp(13px, 1.3vw, 17px);
+}
+
+.chalk-sort-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 4px;
+  font-size: clamp(18px, 2vw, 26px);
+}
+
+.chalk-sort-empty {
+  color: var(--note-pencil);
+  font-size: 0.8em;
+}
+
+/* OX 판정 */
+.chalk-ox-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0;
+}
+
+.chalk-ox-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--note-rule);
+  font-size: clamp(16px, 1.85vw, 25px);
+  line-height: 1.45;
+}
+
+.chalk-ox-row.shake {
+  animation: chalk-shake 0.4s ease-in-out;
+}
+
+.chalk-ox-row.shake .chalk-ox-text {
+  color: var(--chalk-circle);
+}
+
+.chalk-ox-num {
+  color: var(--chalk-note);
+}
+
+.chalk-ox-choices {
+  white-space: nowrap;
+}
+
+.chalk-confirm:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+
+/* 짝 맞추기 */
+.chalk-match-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+  gap: 6px clamp(14px, 2.4vw, 32px);
+}
+
+.chalk-match-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chalk-match-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--chalk-text);
+  font: inherit;
+  font-size: clamp(15px, 1.7vw, 23px);
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chalk-match-item:hover:not(:disabled),
+.chalk-match-item.active {
+  border-style: solid;
+  border-color: var(--chalk-answer);
+  background: var(--note-highlight);
+}
+
+.chalk-match-item.done {
+  border-color: transparent;
+  background: none;
+  color: var(--chalk-answer);
+  cursor: default;
+}
+
+.chalk-match-item.shake {
+  animation: chalk-shake 0.4s ease-in-out;
+  border-color: var(--chalk-circle);
+}
+
+.chalk-match-num {
+  color: var(--chalk-circle);
+}
+
+/* 순서 정하기 */
+.chalk-order-list,
+.chalk-choice-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0;
+}
+
+.chalk-order-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 1.7em;
+  border-bottom: 1px solid var(--note-rule);
+  font-size: clamp(16px, 1.9vw, 26px);
+}
+
+.chalk-order-blank {
+  flex: 1;
+  height: 1.2em;
+}
+
+.chalk-order-card {
+  min-width: 0;
+  font-size: 15px;
+  text-align: left;
+}
+
+.chalk-word-card.shake {
+  animation: chalk-shake 0.4s ease-in-out;
+}
+
+/* 객관식 */
+.chalk-choice-list li {
+  border-bottom: 1px solid var(--note-rule);
+}
+
+.chalk-choice {
+  padding: 2px 12px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--chalk-text);
+  font: inherit;
+  font-size: clamp(16px, 1.9vw, 26px);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chalk-choice:hover:not(:disabled) {
+  border-color: rgba(220, 38, 38, 0.45);
+  border-style: dashed;
+}
+
+.chalk-choice.circled {
+  border-color: var(--chalk-circle);
+  color: var(--chalk-answer);
+  animation: chalk-write 0.35s ease-out;
+}
+
+.chalk-choice.crossed {
+  color: var(--note-pencil);
+  text-decoration: line-through;
+  text-decoration-color: var(--chalk-circle);
+  animation: chalk-shake 0.4s ease-in-out;
+}
+
+.chalk-choice:disabled {
+  cursor: default;
+}
+
+@media (max-width: 900px) {
+  .chalk-match-grid {
+    grid-template-columns: 1fr;
+  }
+}
